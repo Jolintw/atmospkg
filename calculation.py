@@ -25,6 +25,7 @@ def saturation_vapor_pressure(T, Tunit = "K"):
 
 def saturation_mixingratio(T, P, Tunit = "K", Punit = "Pa"):
     es = saturation_vapor_pressure(T, Tunit)
+    P = Punitconversion(P, Punit, aimunit="Pa")
     return mixingratio_from_pressure(es, P)
 
 
@@ -45,3 +46,14 @@ def Tunitconversion(T, nowunit, aimunit = T_standard_unit):
     if nowunit == "degC" and aimunit == "K":
         T = T + 273.15
     return T
+
+P_standard_unit = "Pa"
+def Punitconversion(P, nowunit, aimunit = P_standard_unit):
+    if aimunit != P_standard_unit and nowunit != P_standard_unit:
+        P = Punitconversion(P, nowunit)
+        nowunit = P_standard_unit
+    if nowunit == "Pa" and aimunit == "hPa":
+        P = P / 100.0
+    if nowunit == "hPa" and aimunit == "Pa":
+        P = P * 100.0
+    return P
