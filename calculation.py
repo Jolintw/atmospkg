@@ -1,4 +1,15 @@
 import numpy as np
+class constants:
+    # gas constant (J / K / mol)
+    R = 8.314462618 # https://physics.nist.gov/cgi-bin/cuu/Value?r
+    # molecular weight (kg / kmol) of 
+    Md = 28.964 # dry air (U.S. standard atmosphere 1976 https://ntrs.nasa.gov/api/citations/19770009539/downloads/19770009539.pdf
+    Mv = 18.0153 # water vapor (https://webbook.nist.gov/cgi/cbook.cgi?ID=C7732185
+    # gas constant  (J / K / kg)
+    Rd = R / Md * 1000 # dry air 
+    Rv = R / Mv * 1000 # water vapor
+    # parameter
+    epsilon = Rd / Rv
 
 def saturation_vapor_pressure(T, Tunit = "K"):
     """estimate saturation vapor pressure (es)
@@ -9,6 +20,28 @@ def saturation_vapor_pressure(T, Tunit = "K"):
     :param T: temperature
     :param Tunit: unit of temperature K or degC
     """
+    T = Tunitconversion(T, Tunit, aimunit = "K")
     return 6.1094 * np.exp(T*17.625/(243.04+T))
 
-def 
+def saturation_mixingratio(T, P, Tunit = "K", Punit = "Pa"):
+    es = saturation_vapor_pressure(T, Tunit)
+    return mixingratio_from_pressure(es, P)
+
+
+def mixingratio_from_pressure(e, P):
+    """
+    :param e: vapor pressure
+    :param P: air pressure
+    """
+    return constants.epsilon*e/(P-e)
+
+T_standard_unit = "K"
+def Tunitconversion(T, nowunit, aimunit = T_standard_unit):
+    if aimunit != T_standard_unit and nowunit != T_standard_unit:
+        T = Tunitconversion(T, nowunit)
+        nowunit = T_standard_unit
+    if nowunit == "K" and aimunit == "degC":
+        T = T - 273.15
+    if nowunit == "degC" and aimunit == "K":
+        T = T + 273.15
+    return T
