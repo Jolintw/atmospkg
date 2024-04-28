@@ -36,6 +36,13 @@ def mixingratio_from_pressure(e, P):
     """
     return constants.epsilon*e/(P-e)
 
+def wswd_to_uv(ws, wd, wdunit = "rad", wdtype = "met"):
+    wd = angleunitconversion(wd, wdunit, "rad")
+    wd = angletypeconversion(wd, wdtype, "met")
+    u = -np.sin(wd) * ws
+    v = -np.cos(wd) * ws
+    return u, v
+
 T_standard_unit = "K"
 def Tunitconversion(T, nowunit, aimunit = T_standard_unit):
     if aimunit != T_standard_unit and nowunit != T_standard_unit:
@@ -57,3 +64,14 @@ def Punitconversion(P, nowunit, aimunit = P_standard_unit):
     if nowunit == "hPa" and aimunit == "Pa":
         P = P * 100.0
     return P
+
+angle_standard_unit = "rad"
+def angleunitconversion(angle, nowunit, aimunit = angle_standard_unit):
+    if nowunit == "rad" and aimunit == "deg":
+        angle = angle/np.pi*180.0
+    if nowunit == "deg" and aimunit == "rad":
+        angle = angle/180.0*np.pi
+
+def angletypeconversion(angle, nowtype, aimtype):
+    if nowtype != aimtype:
+        angle = np.pi / 2 - angle
