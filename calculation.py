@@ -10,6 +10,9 @@ class constants:
     Rv = R / Mv * 1000 # water vapor
     # parameter
     epsilon = Rd / Rv
+    # specific heat
+    Cp = 1005.7
+    kappa = Rd / Cp
 
 def saturation_vapor_pressure(T, Tunit = "K"):
     """estimate saturation vapor pressure (es)
@@ -28,13 +31,27 @@ def saturation_mixingratio(T, P, Tunit = "K", Punit = "Pa"):
     P = Punitconversion(P, Punit, aimunit="Pa")
     return mixingratio_from_pressure(es, P)
 
-
 def mixingratio_from_pressure(e, P):
     """
     :param e: vapor pressure
     :param P: air pressure
     """
     return constants.epsilon*e/(P-e)
+
+def potential_temperature(T, P, Tunit = "K", Punit = "Pa"):
+    """estimate potential temperature
+    theta = T * (100000 / P) ^ (Rd / Cp)
+    T unit: K
+    P unit: Pa
+    :param T: temperature
+    :param Tunit: unit of temperature K or degC
+    :param P: pressure
+    :param Punit: unit of pressure Pa or hPa
+    """
+    T = Tunitconversion(T, Tunit, aimunit = "K")
+    P = Punitconversion(P, Punit, aimunit="Pa")
+    pt = T * (1e5 / P)**(constants.kappa)
+    return pt
 
 def wswd_to_uv(ws, wd, wdunit = "rad", wdtype = "met"):
     wd = angleunitconversion(wd, wdunit, "rad")
