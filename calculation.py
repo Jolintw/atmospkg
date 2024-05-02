@@ -28,7 +28,7 @@ def saturation_vapor_pressure(T, Tunit = "K"):
 
 def saturation_mixingratio(T, P, Tunit = "K", Punit = "Pa"):
     es = saturation_vapor_pressure(T, Tunit)
-    P = Punitconversion(P, Punit, aimunit="Pa")
+    P = Punitconversion(P, Punit, aimunit="hPa")
     return mixingratio_from_pressure(es, P)
 
 def mixingratio_from_pressure(e, P):
