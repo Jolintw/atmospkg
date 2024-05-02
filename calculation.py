@@ -23,7 +23,7 @@ def saturation_vapor_pressure(T, Tunit = "K"):
     :param T: temperature
     :param Tunit: unit of temperature K or degC
     """
-    T = Tunitconversion(T, Tunit, aimunit = "K")
+    T = Tunitconversion(T, Tunit, aimunit = "degC")
     return 6.1094 * np.exp(T*17.625/(243.04+T))
 
 def saturation_mixingratio(T, P, Tunit = "K", Punit = "Pa"):
