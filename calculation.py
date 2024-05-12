@@ -13,6 +13,7 @@ class constants:
     # specific heat
     Cp = 1005.7
     kappa = Rd / Cp
+    g = 9.81
 
 def saturation_vapor_pressure(T, Tunit = "K"):
     """estimate saturation vapor pressure (es)
@@ -38,6 +39,16 @@ def mixingratio_from_pressure(e, P):
     """
     return constants.epsilon*e/(P-e)
 
+def vapor_pressure_from_mixingratio(qv, P, qvunit = "kg/kg", Punit = "Pa"):
+    """
+    :param qv: mixingratio
+    :param P: air pressure
+    """
+    P  = Punitconversion(P, Punit, aimunit="Pa")
+    qv = Qunitconversion(qv, qvunit, aimunit="kg/kg")
+    return qv / constants.epsilon * P / (1 + qv / constants.epsilon)
+
+
 def potential_temperature(T, P, Tunit = "K", Punit = "Pa"):
     """estimate potential temperature
     theta = T * (100000 / P) ^ (Rd / Cp)
@@ -59,6 +70,27 @@ def wswd_to_uv(ws, wd, wdunit = "rad", wdtype = "met"):
     u = - np.sin(wd) * ws
     v = - np.cos(wd) * ws
     return u, v
+
+def calculate_geopotential_height(P, T, e, Tunit = "K", Punit = "Pa", eunit = "Pa"):
+    """
+    P: pressure
+    T: temperature
+    e: water vapor pressure
+    rho: density
+    z: geopotential height
+    """
+    T  = Tunitconversion(T, Tunit, aimunit="K")
+    P  = Punitconversion(P, Punit, aimunit="Pa")
+    e  = Punitconversion(e, eunit, aimunit="Pa")
+    dP = P[1:] - P[:-1]
+    T_mid   = (T[1:] + T[:-1]) / 2
+    e_mid   = (e[1:] + e[:-1]) / 2
+    Pd_mid  = (P[1:] + P[:-1]) / 2 - e_mid
+    rho_mid = (Pd_mid / constants.Rd + e_mid / constants.Rv) / T_mid
+    dz      = - dP / (rho_mid * constants.g)
+    z       = np.zeros_like(P)
+    z[1:]   = np.cumsum(dz)
+    return z
 
 T_standard_unit = "K"
 def Tunitconversion(T, nowunit, aimunit = T_standard_unit):
@@ -94,3 +126,10 @@ def angletypeconversion(angle, nowtype, aimtype):
     if nowtype != aimtype:
         angle = np.pi / 2 - angle
     return angle
+
+def Qunitconversion(Q, nowunit, aimunit):
+    if nowunit == "g/kg" and (aimunit in ["kg/kg", ""]):
+        Q = Q / 1e3
+    if (nowunit in ["kg/kg", ""]) and aimunit == "g/kg":
+        Q = Q * 1e3
+    return Q
