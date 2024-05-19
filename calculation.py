@@ -49,8 +49,8 @@ def vapor_pressure_from_mixingratio(qv, P, qvunit = "kg/kg", Punit = "Pa"):
     return qv / constants.epsilon * P / (1 + qv / constants.epsilon)
 
 
-def potential_temperature(T, P, Tunit = "K", Punit = "Pa"):
-    """estimate potential temperature
+def potential_temperature(T, P, P_ref = 100000, Tunit = "K", Punit = "Pa", P_baseunit = "Pa"):
+    """estimate potential temperature (adiabatic lifting of downwelling to P_base)
     theta = T * (100000 / P) ^ (Rd / Cp)
     T unit: K
     P unit: Pa
@@ -61,7 +61,8 @@ def potential_temperature(T, P, Tunit = "K", Punit = "Pa"):
     """
     T = Tunitconversion(T, Tunit, aimunit = "K")
     P = Punitconversion(P, Punit, aimunit="Pa")
-    pt = T * (1e5 / P)**(constants.kappa)
+    P_ref = Punitconversion(P_ref, P_baseunit, aimunit="Pa")
+    pt = T * (P_ref / P)**(constants.kappa)
     return pt
 
 def wswd_to_uv(ws, wd, wdunit = "rad", wdtype = "met"):
@@ -91,6 +92,37 @@ def calculate_geopotential_height(P, T, e, Tunit = "K", Punit = "Pa", eunit = "P
     z       = np.zeros_like(P)
     z[1:]   = np.cumsum(dz)
     return z
+
+def calculate_LCL(P, T, qv, dP, Tunit = "K", Punit = "Pa", qvunit = "kg/kg"):
+    """
+    P: pressure
+    dP: 10 times of pressure resolution
+    T: temperature
+    qv: water vapor mixingratio
+    """
+    T  = Tunitconversion(T, Tunit, aimunit="K")
+    P  = Punitconversion(P, Punit, aimunit="Pa")
+    dP  = Punitconversion(dP, Punit, aimunit="Pa")
+    qv = Qunitconversion(qv, qvunit, aimunit="kg/kg")
+    # PT_1000hPa = potential_temperature(T, P, Tunit = Tunit, Punit = Punit)
+    Pnow = P
+    Tnow = potential_temperature(T, P, P_ref=Pnow)
+    qvsnow = saturation_mixingratio(T=Tnow, P=Pnow)
+    while qvsnow < qv:
+        Pnow += dP
+        Tnow = potential_temperature(T, P, P_ref=Pnow)
+        qvsnow = saturation_mixingratio(T=Tnow, P=Pnow)
+
+    dP = dP * 0.1
+    while qvsnow > qv:
+        Pnow -= dP
+        Tnow = potential_temperature(T, P, P_ref=Pnow)
+        qvsnow = saturation_mixingratio(T=Tnow, P=Pnow)
+    Pnow += dP
+
+    return Pnow
+
+
 
 T_standard_unit = "K"
 def Tunitconversion(T, nowunit, aimunit = T_standard_unit):
