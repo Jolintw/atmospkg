@@ -14,6 +14,9 @@ class constants:
     Cp = 1005.7
     kappa = Rd / Cp
     g = 9.81
+    def latent_heat(T, Tunit="K"): # J / kg
+        T = Tunitconversion(T, nowunit=Tunit, aimunit="degC")
+        return (2.501 - 0.00237 * T) * 1e6
 
 def saturation_vapor_pressure(T, Tunit = "K"):
     """estimate saturation vapor pressure (es)
@@ -41,15 +44,16 @@ def mixingratio_from_pressure(e, P):
 
 def vapor_pressure_from_mixingratio(qv, P, qvunit = "kg/kg", Punit = "Pa"):
     """
-    :param qv: mixingratio
-    :param P: air pressure
+    qv: mixingratio
+    P: air pressure
+    return: vapor pressure (Pa)
     """
     P  = Punitconversion(P, Punit, aimunit="Pa")
     qv = Qunitconversion(qv, qvunit, aimunit="kg/kg")
     return qv / constants.epsilon * P / (1 + qv / constants.epsilon)
 
 
-def potential_temperature(T, P, P_ref = 100000, Tunit = "K", Punit = "Pa", P_baseunit = "Pa"):
+def potential_temperature(T, P, P_ref = 100000, Tunit = "K", Punit = "Pa", P_refunit = "Pa"):
     """estimate potential temperature (adiabatic lifting of downwelling to P_base)
     theta = T * (100000 / P) ^ (Rd / Cp)
     T unit: K
@@ -61,7 +65,7 @@ def potential_temperature(T, P, P_ref = 100000, Tunit = "K", Punit = "Pa", P_bas
     """
     T = Tunitconversion(T, Tunit, aimunit = "K")
     P = Punitconversion(P, Punit, aimunit="Pa")
-    P_ref = Punitconversion(P_ref, P_baseunit, aimunit="Pa")
+    P_ref = Punitconversion(P_ref, P_refunit, aimunit="Pa")
     pt = T * (P_ref / P)**(constants.kappa)
     return pt
 
@@ -122,6 +126,20 @@ def calculate_LCL(P, T, qv, dP, Tunit = "K", Punit = "Pa", qvunit = "kg/kg"):
 
     return Pnow
 
+def equivalent_potential_temperature(T, P, qv, Tunit="K", Punit="Pa", qvunit="kg/kg"):
+    """
+    The Computation of Equivalent Potential Temperature (David Bolton 1980)
+    https://doi.org/10.1175/1520-0493(1980)108<1046:TCOEPT>2.0.CO;2
+    """
+    TK = Tunitconversion(T, nowunit=Tunit, aimunit="K")
+    P  = Punitconversion(P, nowunit=Punit, aimunit="hPa")
+    qv = Qunitconversion(qv, nowunit=qvunit, aimunit="g/kg")
+    e  = vapor_pressure_from_mixingratio(qv, P, qvunit="g/kg", Punit="hPa") 
+    e  = Punitconversion(e, nowunit="Pa", aimunit="hPa")
+    TL = 2840 / (3.5*np.log(TK) - np.log(e) - 4.805) + 55
+    EPT = TK*((1000 / P) ** (0.2854 * (1 - 0.28 * 1e-3 * qv)))
+    EPT = EPT * np.exp((3.376 / TL - 0.00254) * qv * (1 + 0.81 * 1e-3 * qv))
+    return EPT
 
 
 T_standard_unit = "K"
@@ -165,3 +183,16 @@ def Qunitconversion(Q, nowunit, aimunit):
     if (nowunit in ["kg/kg", ""]) and aimunit == "g/kg":
         Q = Q * 1e3
     return Q
+
+if __name__ == "__main__":
+    T = 25
+    P = 1000
+    qv = 16
+    LCL = calculate_LCL(P, T, qv, dP=0.1, Tunit = "degC", Punit = "hPa", qvunit = "g/kg")
+    # print(LCL)
+    EPT = equivalent_potential_temperature(T, P, qv, Tunit="degC", Punit="hPa", qvunit="g/kg")
+    
+    TL = potential_temperature(T, P, P_ref=LCL, Tunit="degC", Punit="hPa")
+    print(TL)
+    print(EPT)
+    
