@@ -126,6 +126,19 @@ def calculate_LCL(P, T, qv, dP, Tunit = "K", Punit = "Pa", qvunit = "kg/kg"):
 
     return Pnow
 
+def sea_level_pressure(T, P, z, lapse_rate, z_ref = 0, Tunit="K", Punit="Pa"):
+    """
+    z: meter
+    lapse_rate: K / meter
+    return slp (Pa)
+    """
+    TK = Tunitconversion(T, nowunit=Tunit, aimunit="K")
+    P  = Punitconversion(P, nowunit=Punit, aimunit="Pa")
+    g = constants.g
+    Rd = constants.Rd
+    SLP = P * ((TK - (z_ref - z)*lapse_rate) / TK) ** (g / Rd / lapse_rate)
+    return SLP
+
 def equivalent_potential_temperature(T, P, qv, Tunit="K", Punit="Pa", qvunit="kg/kg"):
     """
     The Computation of Equivalent Potential Temperature (David Bolton 1980)
