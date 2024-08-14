@@ -38,6 +38,9 @@ def vapor_pressure_from_mixingratio(qv, P, qvunit = "kg/kg", Punit = "Pa"):
     qv = Qunitconversion(qv, qvunit, aimunit="kg/kg")
     return qv / constants.epsilon * P / (1 + qv / constants.epsilon)
 
+def specific_humidity_from_mixingratio(qv, qvunit = "kg/kg"):
+    qv = Qunitconversion(qv, qvunit, aimunit="kg/kg")
+    return qv / (1 + qv)
 
 def potential_temperature(T, P, P_ref = 100000, Tunit = "K", Punit = "Pa", P_refunit = "Pa"):
     """estimate potential temperature (adiabatic lifting of downwelling to P_base)
@@ -141,6 +144,21 @@ def equivalent_potential_temperature(T, P, qv, Tunit="K", Punit="Pa", qvunit="kg
     return EPT
 
 
+def column_water_vapor(P, qv, Punit="Pa", qvunit="kg/kg", zaxis = 0):
+    """
+    also called precipitable water
+    zaxis: which axis (dim) is for height (or pressure)
+    """
+    P  = Punitconversion(P, nowunit=Punit, aimunit="Pa")
+    qv = Qunitconversion(qv, nowunit=qvunit, aimunit="kg/kg")
+    sh = specific_humidity_from_mixingratio(qv)
+    dP = - (P[1:] - P[:-1])
+    sh_mid = (sh[1:] + sh[:-1]) / 2.0
+    dP = dP.swapaxes(0, zaxis)
+    sh_mid = sh_mid.swapaxes(0, zaxis)
+    cwv = (dP * sh_mid) / constants.g
+    cwv = cwv.swapaxes(0, zaxis)
+    return cwv
 
 if __name__ == "__main__":
     T = 25
