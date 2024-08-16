@@ -152,12 +152,14 @@ def column_water_vapor(P, qv, Punit="Pa", qvunit="kg/kg", zaxis = 0):
     P  = Punitconversion(P, nowunit=Punit, aimunit="Pa")
     qv = Qunitconversion(qv, nowunit=qvunit, aimunit="kg/kg")
     sh = specific_humidity_from_mixingratio(qv)
+    P = P.swapaxes(0, zaxis)
+    sh = sh.swapaxes(0, zaxis)
     dP = - (P[1:] - P[:-1])
     sh_mid = (sh[1:] + sh[:-1]) / 2.0
-    dP = dP.swapaxes(0, zaxis)
-    sh_mid = sh_mid.swapaxes(0, zaxis)
     cwv = (dP * sh_mid) / constants.g
     cwv = cwv.swapaxes(0, zaxis)
+    cwv = np.nansum(cwv, axis=zaxis)
+    
     return cwv
 
 if __name__ == "__main__":
