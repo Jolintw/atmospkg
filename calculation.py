@@ -1,7 +1,8 @@
+import numpy as np
+
 from atmospkg.constant import constants
 from atmospkg.unit import Tunitconversion, Qunitconversion, Punitconversion
 from atmospkg.unit import angletypeconversion, angleunitconversion
-import numpy as np
 
 
 def saturation_vapor_pressure(T, Tunit = "K"):
@@ -159,7 +160,6 @@ def column_water_vapor(P, qv, Punit="Pa", qvunit="kg/kg", zaxis = 0):
     cwv = (dP * sh_mid) / constants.g
     cwv = cwv.swapaxes(0, zaxis)
     cwv = np.nansum(cwv, axis=zaxis)
-    
     return cwv
 
 if __name__ == "__main__":
