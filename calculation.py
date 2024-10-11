@@ -162,6 +162,20 @@ def column_water_vapor(P, qv, Punit="Pa", qvunit="kg/kg", zaxis = 0):
     cwv = np.nansum(cwv, axis=zaxis)
     return cwv
 
+def density(P, T, e = 0, Tunit = "K", Punit = "Pa", eunit = "Pa"):
+    """
+    P: pressure (total, not only dry)\n
+    T: temperature\n
+    e: water vapor pressure\n
+    rho: density (kg/m^3)\n
+    """
+    T  = Tunitconversion(T, Tunit, aimunit="K")
+    P  = Punitconversion(P, Punit, aimunit="Pa")
+    e  = Punitconversion(e, eunit, aimunit="Pa")
+    Pd  = P - e
+    rho = (Pd / constants.Rd + e / constants.Rv) / T
+    return rho
+
 if __name__ == "__main__":
     T = 25
     P = 1000

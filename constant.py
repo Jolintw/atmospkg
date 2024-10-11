@@ -1,4 +1,5 @@
 from atmospkg.unit import Tunitconversion
+import numpy as np
 
 class constants:
     # gas constant (J / K / mol)
@@ -15,6 +16,13 @@ class constants:
     Cp = 1005.7
     kappa = Rd / Cp
     g = 9.81
+    earth_omega = 2 * np.pi / 86400
+
+    @classmethod
+    def f(cls, lat):
+        return 2 * cls.earth_omega * np.sin(lat)
+    
+    @staticmethod
     def latent_heat(T, Tunit="K"): # J / kg
         T = Tunitconversion(T, nowunit=Tunit, aimunit="degC")
         return (2.501 - 0.00237 * T) * 1e6
