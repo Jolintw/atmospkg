@@ -176,6 +176,14 @@ def density(P, T, e = 0, Tunit = "K", Punit = "Pa", eunit = "Pa"):
     rho = (Pd / constants.Rd + e / constants.Rv) / T
     return rho
 
+def temperature_from_density(rho, P, Punit = "Pa"):
+    """
+    density temperature includes contributions of dry air and water in its various states via the total density
+    """
+    P  = Punitconversion(P, Punit, aimunit="Pa")
+    T_rho = P / constants.Rd / rho
+    return T_rho
+
 if __name__ == "__main__":
     T = 25
     P = 1000
