@@ -45,7 +45,7 @@ def dpidx(U = [], X = [], theta_rho_bar = np.array([]), rho = np.array([]), lat 
     tau = turbulent_fluxes_Deardorff1975(U=[w, v, u], X=[z, y, x], i=2, rho=rho, diffrential_func = diffrential_func_turb)
     rho = broadcast_to_any(rho, shape=U[0].shape, n=0)
     theta_rho_bar = broadcast_to_any(theta_rho_bar, shape=U[0].shape, n=0)
-    turb = diffrential_func_adv_horizontal(tau, x, 2, broadX=True) / rho
+    turb = 0#diffrential_func_adv_horizontal(tau, x, 2, broadX=True) / rho
 
     result = -1 / Cp / theta_rho_bar * (u * dudx + v * dudy + w * dudz - f * v - turb)
     return result
@@ -70,7 +70,7 @@ def dpidy(U = [], X = [], theta_rho_bar = np.array([]), rho = np.array([]), lat 
     dvdz = diffrential_func_adv_vertical(v, z, 0, broadX=True)
     tau = turbulent_fluxes_Deardorff1975(U=[w, v, u], X=[z, y, x], i=1, rho=rho, diffrential_func = diffrential_func_turb)
     rho = broadcast_to_any(rho, shape=U[0].shape, n=0)
-    turb = diffrential_func_adv_horizontal(tau, y, 1, broadX=True) / rho
+    turb = 0#diffrential_func_adv_horizontal(tau, y, 1, broadX=True) / rho
     result = -1 / Cp / theta_rho_bar * (u * dvdx + v * dvdy + w * dvdz + f * u - turb)
     return result
 
@@ -94,7 +94,7 @@ def dpidz_m_temp(U = [], X = [], theta_rho_bar = np.array([]), rho = np.array([]
     dwdz = diffrential_func_adv_vertical(w, z, 0, broadX=True)
     tau = turbulent_fluxes_Deardorff1975(U=[w, v, u], X=[z, y, x], i=1, rho=rho, diffrential_func = diffrential_func_turb)
     rho = broadcast_to_any(rho, shape=U[0].shape, n=0)
-    turb = diffrential_func_adv_vertical(tau, z, 0, broadX=True) / rho
+    turb = 0#diffrential_func_adv_vertical(tau, z, 0, broadX=True) / rho
     result = -1 / Cp / theta_rho_bar * (u * dwdx + v * dwdy + w * dwdz + qr * g - turb)
     return result
 
