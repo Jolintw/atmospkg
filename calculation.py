@@ -66,6 +66,15 @@ def wswd_to_uv(ws, wd, wdunit = "rad", wdtype = "met"):
     v = - np.cos(wd) * ws
     return u, v
 
+def uv_to_wswd(u, v, wdunit = "rad", wdtype = "met"):
+    wd = np.arctan2(v, u)
+    wd = angletypeconversion(wd, "math", wdtype)
+    wd = wd  - np.pi
+    wd = angleunitconversion(wd, "rad", wdunit)
+    ws = np.sqrt(u**2 + v**2)
+    
+    return ws, wd
+
 def calculate_geopotential_height(P, T, e, Tunit = "K", Punit = "Pa", eunit = "Pa"):
     """
     P: pressure\n
