@@ -30,6 +30,10 @@ def angleunitconversion(angle, nowunit, aimunit = angle_standard_unit):
     return angle
 
 def angletypeconversion(angle, nowtype, aimtype):
+    """
+    angle: radius angle\n
+    type: math (0 for east and anticlockwise), met (0 for north and clockwise)
+    """
     if nowtype != aimtype:
         angle = np.pi / 2 - angle
     return angle
