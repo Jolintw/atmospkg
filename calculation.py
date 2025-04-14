@@ -136,6 +136,7 @@ def sea_level_pressure(T, P, z, lapse_rate, z_ref = 0, Tunit="K", Punit="Pa"):
     g = constants.g
     Rd = constants.Rd
     SLP = P * ((TK - (z_ref - z)*lapse_rate) / TK) ** (g / Rd / lapse_rate)
+    # SLP = P / np.exp(-g*(z-z_ref)/Rd/T)
     return SLP
 
 def equivalent_potential_temperature(T, P, qv, Tunit="K", Punit="Pa", qvunit="kg/kg"):
