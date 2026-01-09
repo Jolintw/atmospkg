@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.special
 
 from atmospkg.constant import constants
 from atmospkg.unit import Tunitconversion, Qunitconversion, Punitconversion
@@ -193,6 +194,35 @@ def temperature_from_density(rho, P, Punit = "Pa"):
     P  = Punitconversion(P, Punit, aimunit="Pa")
     T_rho = P / constants.Rd / rho
     return T_rho
+
+def LCL(qv, T, P, z, qvunit = "kg/kg", Tunit = "K", Punit = "Pa"):
+    """
+    https://journals.ametsoc.org/view/journals/atsc/74/12/jas-d-17-0102.1.xml?tab_body=pdf
+    """
+    T  = Tunitconversion(T, Tunit, aimunit="K")
+    P  = Punitconversion(P, Punit, aimunit="Pa")
+    qv = Qunitconversion(qv, nowunit=qvunit, aimunit="kg/kg")
+    Cpa = constants.Cpa
+    Cpv = constants.Cpv
+    Cvv = constants.Cvv
+    Cvl = constants.Cvl
+    E0v = constants.E0v
+    Ttrip = constants.Ttrip
+    Rv = constants.Rv
+    Ra = constants.Ra
+    g = constants.g
+    RH = vapor_pressure_from_mixingratio(qv, P) / saturation_vapor_pressure(T)
+    Cpm = (1 - qv)*Cpa + qv*Cpv
+    Rm = (1 - qv)*Ra + qv*Rv
+    a = -(Cpm/Rm-(Cpv-Cvl)/Rv)
+    b = -((E0v-(Cvv-Cvl)*Ttrip)/Rv/T)
+    c = b/a
+    inW = RH**(1/a)*c*np.exp(c)
+    TLCL = c/scipy.special.lambertw(inW, -1)*T
+    PLCL = P*(TLCL/T)**(Cpm/Rm)
+    zLCL = z + Cpm/g*(T-TLCL)
+    return TLCL, PLCL, zLCL
+
 
 if __name__ == "__main__":
     T = 25
