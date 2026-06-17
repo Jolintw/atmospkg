@@ -136,8 +136,11 @@ def sea_level_pressure(T, P, z, lapse_rate, z_ref = 0, Tunit="K", Punit="Pa"):
     P  = Punitconversion(P, nowunit=Punit, aimunit="Pa")
     g = constants.g
     Rd = constants.Rd
-    SLP = P * ((TK - (z_ref - z)*lapse_rate) / TK) ** (g / Rd / lapse_rate)
-    # SLP = P / np.exp(-g*(z-z_ref)/Rd/T)
+    if abs(lapse_rate) <= 0.1:
+        SLP = P / np.exp(-g*(z-z_ref)/Rd/T)
+    else:
+        SLP = P * ((TK - (z_ref - z)*lapse_rate) / TK) ** (g / Rd / lapse_rate)
+    
     return SLP
 
 def equivalent_potential_temperature(T, P, qv, Tunit="K", Punit="Pa", qvunit="kg/kg"):
@@ -223,6 +226,14 @@ def LCL(qv, T, P, z, qvunit = "kg/kg", Tunit = "K", Punit = "Pa"):
     zLCL = z + Cpm/g*(T-TLCL)
     return TLCL, PLCL, zLCL
 
+def virtual_temperature(T, qv, Tunit = "K", qvunit = "kg/kg"):
+    """Tv=T(qv+epsilon)/epsilon/(1+qv)
+    """
+    T  = Tunitconversion(T, Tunit, aimunit="K")
+    qv = Qunitconversion(qv, nowunit=qvunit, aimunit="kg/kg")
+    epsilon = constants.epsilon
+    Tv = T * (qv + epsilon) / epsilon / (1 + qv)
+    return Tv
 
 if __name__ == "__main__":
     T = 25
