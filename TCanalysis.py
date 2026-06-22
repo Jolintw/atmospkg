@@ -13,9 +13,9 @@ def find_minP_in_window(slp, first_guess, window_length):
     Returns:
         (int, int): (x, y) index of TC center (by min slp) 
     """
-    start_x, start_y = first_guess[0], first_guess[1]
-    window_zero_point = (start_x-window_length, start_y-window_length)
+    start_y, start_x = first_guess[0], first_guess[1]
+    window_zero_point = (start_y-window_length, start_x-window_length)
     slp_in_window = slp[start_y-window_length:start_y+window_length+1, start_x-window_length:start_x+window_length+1]
-    ind_in_window = find_minimum_ind_2D(slp_in_window)
+    ind_in_window = find_minimum_ind_2D(slp_in_window)  # return (y, x)
     TC_center_ind = (ind_in_window[0] + window_zero_point[0], ind_in_window[1] + window_zero_point[1])
-    return TC_center_ind
+    return TC_center_ind # (y, x)
