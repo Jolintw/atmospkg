@@ -1,5 +1,6 @@
-from atmospkg.unit import Tunitconversion
 import numpy as np
+
+from atmospkg.unit import Tunitconversion
 
 class constants:
     # gas constant (J / K / mol)
